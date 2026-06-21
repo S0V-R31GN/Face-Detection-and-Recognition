@@ -1,4 +1,4 @@
-# Face Detection and Recognition System
+<img width="1290" height="1350" alt="eigenfaces" src="https://github.com/user-attachments/assets/91c67416-1dcb-43d3-abf3-ecc17b2cf0bf" /><img width="1290" height="1350" alt="eigenfaces" src="https://github.com/user-attachments/assets/83888051-8062-476e-8f11-38568e267f95" /># Face Detection and Recognition System
 
 CPCS-331 Major Project — King Abdulaziz University
 
@@ -112,20 +112,24 @@ Result + attendance log
 
 **PCA captures 93.6% of variance in just 50 of 10,000 pixel dimensions:**
 
-![PCA variance curve](charts/pca_variance_curve.png)
+<img width="1305" height="707" alt="pca_variance_curve" src="https://github.com/user-attachments/assets/9945075f-cc8f-49e2-b336-705cdbd4bb10" />
+
 
 **The first 16 eigenfaces — the principal directions of facial variation
 the model learns:**
 
-![Eigenfaces](charts/eigenfaces.png)
+<img width="1290" height="1350" alt="eigenfaces" src="https://github.com/user-attachments/assets/cfb85011-1467-44c1-b07e-b8e4a6c5af36" />
+
 
 **LDA projection — each person forms a distinct, separable cluster:**
 
-![LDA clusters](charts/lda_clusters.png)
+<img width="1305" height="947" alt="lda_clusters" src="https://github.com/user-attachments/assets/a368f21e-bae0-4aef-a8e7-6869c2c92ff9" />
+
 
 **Confusion matrix on the held-out test set (98.8% accuracy):**
 
-![Confusion matrix](charts/confusion_matrix.png)
+<img width="1142" height="957" alt="confusion_matrix" src="https://github.com/user-attachments/assets/2c8d5674-6297-43f6-9bfc-960a8392cd7c" />
+
 
 ---
 
