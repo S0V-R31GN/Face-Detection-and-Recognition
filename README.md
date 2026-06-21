@@ -1,4 +1,3 @@
-<img width="1290" height="1350" alt="eigenfaces" src="https://github.com/user-attachments/assets/91c67416-1dcb-43d3-abf3-ecc17b2cf0bf" /><img width="1290" height="1350" alt="eigenfaces" src="https://github.com/user-attachments/assets/83888051-8062-476e-8f11-38568e267f95" /># Face Detection and Recognition System
 
 CPCS-331 Major Project — King Abdulaziz University
 
