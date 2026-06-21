@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Face Recognition — Presentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Permanent+Marker&family=Patrick+Hand&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script>
+<style>
+:root{
+  --navy:#1a237e;--teal:#00897b;--coral:#e53935;--violet:#6a1b9a;
+  --amber:#f57f17;--green:#2e7d32;--ink:#2d2d3a;
+  --paper:#fdfaf4;--line:rgba(120,110,90,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#1a1a2e;font-family:'Caveat',cursive}
+
+/* ── SLIDE ── */
+.slides{width:100%;height:100vh;position:relative}
+.slide{
+  position:absolute;inset:0;
+  display:none;
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2rem 3rem;
+}
+.slide.active{display:flex}
+
+/* Notebook slide */
+.slide-inner{
+  background:var(--paper);
+  width:100%;max-width:900px;
+  min-height:80vh;
+  border-radius:4px 8px 8px 4px;
+  padding:2.8rem 3.5rem 2.8rem 4.8rem;
+  position:relative;
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.2),
+    0 16px 48px rgba(0,0,0,.3),
+    0 32px 80px rgba(0,0,0,.2),
+    4px 0 0 #c9b99a inset;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, transparent 66px, rgba(220,80,80,.13) 66px, rgba(220,80,80,.13) 68px, transparent 68px);
+  background-size:100% 34px, 100% 100%;
+  background-position:0 66px, 0 0;
+  display:flex;flex-direction:column;justify-content:center;
+}
+/* tape */
+.slide-inner::after{
+  content:'';position:absolute;
+  top:-9px;left:50%;transform:translateX(-50%) rotate(-1deg);
+  width:72px;height:20px;
+  background:rgba(255,240,150,.5);
+  border:1px solid rgba(200,180,80,.3);border-radius:2px;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+/* rings */
+.rings{position:absolute;left:-14px;top:48px;display:flex;flex-direction:column;gap:34px}
+.ring{width:18px;height:18px;border-radius:50%;border:2.5px solid #a8a39a;background:#2a2a3e;box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+
+/* ── TITLES ── */
+.slide-num{
+  position:absolute;top:1.2rem;right:1.5rem;
+  font-family:'Patrick Hand',cursive;font-size:.85rem;
+  color:#bbb;letter-spacing:2px;
+}
+.big-title{
+  font-family:'Permanent Marker',cursive;
+  font-size:2.4rem;color:var(--navy);
+  text-align:center;letter-spacing:6px;
+  margin-bottom:.3rem;
+  text-shadow:2px 2px 0 rgba(26,35,126,.07);
+}
+.sub-title{
+  font-family:'Patrick Hand',cursive;
+  font-size:1.05rem;color:#777;
+  text-align:center;margin-bottom:1.6rem;
+}
+.title-line{
+  border:none;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(26,35,126,.18) 20%,rgba(26,35,126,.28) 50%,rgba(26,35,126,.18) 80%,transparent);
+  margin:.3rem 0 1.8rem;
+}
+.section-banner{
+  font-family:'Permanent Marker',cursive;
+  font-size:1rem;letter-spacing:5px;color:var(--teal);
+  text-align:center;margin-bottom:1rem;opacity:.75;
+}
+
+/* ── TEXT ── */
+.ni{display:flex;align-items:flex-start;gap:10px;margin:.55rem 0}
+.nd{color:var(--navy);font-weight:700;flex-shrink:0;font-size:1.1rem}
+.nt{font-family:'Patrick Hand',cursive;font-size:1rem;color:var(--ink);line-height:1.75}
+.nt b{color:var(--coral)}
+.nt .t{color:var(--teal);font-weight:700}
+.nt .v{color:var(--violet);font-weight:700}
+.nt .a{color:var(--amber);font-weight:700}
+.nt .g{color:var(--green);font-weight:700}
+
+/* ── FORMULA ── */
+.fb{
+  border-radius:12px;padding:.75rem 1.3rem;
+  margin:.7rem auto;max-width:500px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.fb::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.4) 0%,transparent 60%);border-radius:12px}
+.fb.blue{background:rgba(232,234,246,.7);border:1.5px solid rgba(92,107,192,.3);box-shadow:0 2px 8px rgba(92,107,192,.1)}
+.fb.teal{background:rgba(224,242,241,.7);border:1.5px solid rgba(0,137,123,.28);box-shadow:0 2px 8px rgba(0,137,123,.08)}
+.fb.coral{background:rgba(252,228,236,.65);border:1.5px solid rgba(229,57,53,.25)}
+.fb.violet{background:rgba(237,231,246,.7);border:1.5px solid rgba(106,27,154,.25)}
+.fb.amber{background:rgba(255,248,225,.7);border:1.5px solid rgba(245,127,23,.28)}
+
+/* ── CALLOUTS ── */
+.warn{background:linear-gradient(135deg,rgba(229,57,53,.07),rgba(229,57,53,.03));border-left:3px solid var(--coral);border-radius:0 10px 10px 0;padding:.6rem 1rem;margin:.7rem 0;font-family:'Patrick Hand',cursive;font-size:.95rem}
+.good{background:linear-gradient(135deg,rgba(0,137,123,.07),rgba(0,137,123,.03));border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:.6rem 1rem;margin:.7rem 0;font-family:'Patrick Hand',cursive;font-size:.95rem}
+.info{background:linear-gradient(135deg,rgba(26,35,126,.06),rgba(26,35,126,.02));border-left:3px solid var(--navy);border-radius:0 10px 10px 0;padding:.6rem 1rem;margin:.7rem 0;font-family:'Patrick Hand',cursive;font-size:.95rem}
+.sticky{background:rgba(255,245,150,.7);border-radius:2px;padding:.65rem 1rem;margin:.8rem 0;font-family:'Caveat',cursive;font-size:.98rem;color:#5a4a00;box-shadow:2px 3px 6px rgba(0,0,0,.1);transform:rotate(-.4deg)}
+
+/* ── TABLES ── */
+table.dt{width:100%;border-collapse:collapse;font-family:'Patrick Hand',cursive;font-size:.88rem;margin:.6rem 0}
+table.dt th{background:rgba(26,35,126,.09);color:var(--navy);font-weight:700;padding:.36rem .6rem;border:1px solid rgba(120,110,90,.18);text-align:center}
+table.dt td{padding:.3rem .6rem;border:1px solid rgba(120,110,90,.13);text-align:center}
+table.dt tr:nth-child(even){background:rgba(0,137,123,.04)}
+.p{color:var(--coral);font-weight:700}
+.m{color:var(--navy);font-weight:700}
+.z{color:#999}
+
+/* ── GRID ── */
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.2rem 0}
+.sg2{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin:1.2rem 0}
+.sc{background:rgba(255,255,255,.85);border:1.5px solid rgba(120,110,90,.14);border-radius:12px;padding:.8rem 1rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.sc .big{font-size:2rem;font-weight:700;color:var(--navy);font-family:'Permanent Marker',cursive}
+.sc .lbl{font-family:'Patrick Hand',cursive;font-size:.85rem;color:#777}
+
+/* ── PIPELINE ── */
+.pl{display:flex;flex-direction:column;align-items:center;gap:.22rem;margin:.8rem 0}
+.ps{border-radius:9px;padding:.38rem 1.2rem;font-family:'Patrick Hand',cursive;font-size:.88rem;width:82%;text-align:center;border:1.5px solid rgba(26,35,126,.15);background:rgba(26,35,126,.06);color:var(--navy)}
+.ps.tl{border-color:rgba(0,137,123,.25);background:rgba(0,137,123,.08);color:#00695c}
+.ps.vl{border-color:rgba(106,27,154,.22);background:rgba(106,27,154,.07);color:#6a1b9a}
+.ps.am{border-color:rgba(245,127,23,.25);background:rgba(245,127,23,.08);color:#e65100}
+.ps.gr{border-color:rgba(46,125,50,.25);background:rgba(46,125,50,.08);color:#1b5e20}
+.pa{color:#bbb;font-size:1rem;line-height:1}
+
+/* ── DIVIDER ── */
+.div{border:none;height:1.5px;background:linear-gradient(90deg,transparent,rgba(120,110,90,.2) 30%,rgba(120,110,90,.3) 50%,rgba(120,110,90,.2) 70%,transparent);margin:1.5rem 0}
+
+/* ── SYMBOL TABLE ── */
+.st{width:100%;border-collapse:collapse;margin:.5rem 0;font-family:'Patrick Hand',cursive;font-size:.92rem}
+.st td{padding:.2rem .5rem;vertical-align:top}
+.st td:first-child{color:var(--navy);font-weight:700;white-space:nowrap;width:110px}
+.st td:last-child{color:#4a4a5a}
+
+/* ── NAVIGATION ── */
+.nav{
+  position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:1rem;
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(10px);
+  border-radius:99px;padding:.5rem 1.2rem;
+  border:1px solid rgba(255,255,255,.15);
+  z-index:100;
+}
+.nav-btn{
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;border-radius:50%;
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:1.1rem;
+  transition:background .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.25)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.nav-counter{font-family:'Patrick Hand',cursive;font-size:.95rem;color:#ddd;min-width:60px;text-align:center}
+.progress{
+  position:fixed;top:0;left:0;height:3px;
+  background:linear-gradient(90deg,var(--teal),var(--violet));
+  transition:width .3s;z-index:200;
+}
+/* keyboard hint */
+.key-hint{
+  position:fixed;bottom:1.8rem;right:2rem;
+  font-family:'Patrick Hand',cursive;font-size:.8rem;
+  color:rgba(255,255,255,.35);letter-spacing:1px;
+}
+
+/* ── COVER slide ── */
+.cover-inner{
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  width:100%;max-width:900px;min-height:80vh;
+  border-radius:12px;
+  padding:3rem;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+  position:relative;overflow:hidden;
+}
+.cover-inner::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(0,137,123,.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(106,27,154,.2) 0%, transparent 50%);
+}
+.cover-title{
+  font-family:'Permanent Marker',cursive;
+  font-size:3rem;color:#fff;
+  text-align:center;letter-spacing:4px;
+  text-shadow:0 2px 20px rgba(0,137,123,.5);
+  position:relative;margin-bottom:.5rem;
+}
+.cover-sub{
+  font-family:'Patrick Hand',cursive;
+  font-size:1.1rem;color:rgba(255,255,255,.7);
+  text-align:center;margin-bottom:2rem;
+  position:relative;
+}
+.cover-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:99px;padding:.4rem 1rem;
+  font-family:'Patrick Hand',cursive;
+  font-size:.95rem;color:#fff;margin:.3rem;
+  position:relative;
+}
+.badges{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem;margin-top:1rem;position:relative}
+.cover-acc{
+  font-family:'Permanent Marker',cursive;
+  font-size:4rem;color:var(--teal);
+  text-align:center;position:relative;
+  text-shadow:0 0 30px rgba(0,137,123,.4);
+}
+.cover-acc-lbl{font-family:'Patrick Hand',cursive;font-size:1rem;color:rgba(255,255,255,.6);text-align:center;position:relative}
+
+/* comp table */
+.cmp{width:100%;border-collapse:collapse;font-family:'Patrick Hand',cursive;font-size:.88rem;margin:.8rem 0}
+.cmp th{padding:.45rem .7rem;text-align:center;font-weight:700;border-bottom:2px solid rgba(120,110,90,.2)}
+.cmp td{padding:.35rem .7rem;text-align:center;border-bottom:1px solid rgba(120,110,90,.1)}
+.cmp tr:nth-child(even) td{background:rgba(0,0,0,.02)}
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+
+<div class="slides" id="slides">
+
+<!-- ══ SLIDE 1: COVER ══ -->
+<div class="slide active" id="s1">
+  <div class="cover-inner">
+    <div class="cover-title">Face Detection<br>& Recognition</div>
+    <div class="cover-sub">A Real-Time Attendance System · Classical Fisherfaces with Modern Detection</div>
+    <div class="cover-acc">98.78%</div>
+    <div class="cover-acc-lbl">Test Accuracy</div>
+    <div class="badges">
+      <span class="cover-badge">📷 MediaPipe Detection</span>
+      <span class="cover-badge">📐 Affine Alignment</span>
+      <span class="cover-badge">📊 PCA → LDA → SVM</span>
+      <span class="cover-badge">🎯 6 Classes · 407 Samples</span>
+      <span class="cover-badge">⚡ ~150ms Inference</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2: PROBLEM ══ -->
+<div class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">2 / 16</div>
+    <div class="big-title">Problem Definition</div>
+    <hr class="title-line">
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Task:</b> Multi-class face classification with rejection. Given an image → output a registered person's name, or "Unknown".</span></div>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Two modes:</b> Live webcam (real-time attendance) and photo upload (verification).</span></div>
+    <div class="div"></div>
+    <div class="section-banner">· Mitchell's T · E · P ·</div>
+    <div class="sg">
+      <div class="sc"><div class="big" style="color:var(--teal);font-size:1.4rem">T — Task</div><div class="lbl">Classify face into 1 of 6 classes (5 registered + Unknown)</div></div>
+      <div class="sc"><div class="big" style="color:var(--coral);font-size:1.4rem">E — Experience</div><div class="lbl">325 labeled training images</div></div>
+      <div class="sc"><div class="big" style="color:var(--violet);font-size:1.4rem">P — Performance</div><div class="lbl">Accuracy, Precision, Recall, F1 on 82-sample test set</div></div>
+    </div>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Key requirement:</b> reject unknowns rather than force them into a known class — this is <span class="t">open-set recognition</span>.</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3: DATASET ══ -->
+<div class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">3 / 16</div>
+    <div class="big-title">Dataset</div>
+    <hr class="title-line">
+    <div class="sg">
+      <div class="sc"><div class="big">407</div><div class="lbl">total images</div></div>
+      <div class="sc"><div class="big" style="color:var(--teal)">6</div><div class="lbl">classes</div></div>
+      <div class="sc"><div class="big" style="color:var(--coral)">325/82</div><div class="lbl">train / test split</div></div>
+    </div>
+    <table class="dt" style="margin-top:.8rem">
+      <tr><th>Class</th><th>Images</th><th>Notes</th></tr>
+      <tr><td>Abdu2, abod, aziz</td><td>27–40 each</td><td>Team members</td></tr>
+      <tr><td>Ahmad, Aseel</td><td>~30–50 each</td><td>Volunteer subjects</td></tr>
+      <tr><td><b>Unknown</b></td><td><b>200</b></td><td>Public-domain faces — intentionally large</td></tr>
+    </table>
+    <div class="sticky">💡 Unknown is 200 images because it must represent ALL non-registered faces, not just one person. Standard open-set recognition technique.</div>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Ahmad ↔ Abdu2 issue:</b> both classes have very similar bright-skewed pixel intensity (peaks at 200–220). This directly causes the single misclassification.</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4: FULL PIPELINE ══ -->
+<div class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">4 / 16</div>
+    <div class="big-title">Full Pipeline</div>
+    <hr class="title-line">
+    <div class="pl">
+      <div class="ps">📷 Raw Image → BGR NumPy array (H × W × 3)</div>
+      <div class="pa">↓</div>
+      <div class="ps tl">MediaPipe BlazeFace → face bounding box + 6 keypoints</div>
+      <div class="pa">↓</div>
+      <div class="ps tl">Affine Alignment → canonical 100×100 grayscale</div>
+      <div class="pa">↓</div>
+      <div class="ps">Flatten → 10,000-dimensional feature vector</div>
+      <div class="pa">↓</div>
+      <div class="ps vl">PCA → 50 dimensions (93.6% variance kept)</div>
+      <div class="pa">↓</div>
+      <div class="ps vl">LDA → 5 dimensions (identity-discriminative)</div>
+      <div class="pa">↓</div>
+      <div class="ps am">SVM + RBF kernel + Platt scaling → name + probability</div>
+      <div class="pa">↓</div>
+      <div class="ps gr">P ≥ 40% → log attendance ✓ &nbsp;·&nbsp; P < 40% → Unknown ✗</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5: MEDIAPIPE + ALIGNMENT ══ -->
+<div class="slide" id="s5">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">5 / 16</div>
+    <div class="big-title">Detection & Alignment</div>
+    <hr class="title-line">
+    <div class="section-banner">· The Most Important Stage ·</div>
+    <div class="sg2">
+      <div>
+        <div class="ni"><span class="nd">—</span><span class="nt"><b>MediaPipe BlazeFace:</b> Google's mobile-optimized detector. Returns bounding box + <span class="t">6 keypoints</span> (eyes, nose, mouth, ears).</span></div>
+        <div class="ni"><span class="nd">—</span><span class="nt"><b>Why not Haar?</b> No keypoints → can't align. Fails on tilted faces.</span></div>
+      </div>
+      <div>
+        <div class="ni"><span class="nd">—</span><span class="nt"><b>Affine Transform:</b> uses right eye, left eye, nose tip to compute warp matrix M.</span></div>
+        <div class="fb teal" style="font-size:.85rem">$$[x_{out}, y_{out}]^T = M \cdot [x_{in}, y_{in}, 1]^T$$</div>
+      </div>
+    </div>
+    <div class="info">Fixed output positions in 100×100: Right eye → (35,40) · Left eye → (65,40) · Nose → (50,65)</div>
+    <div class="good">Result: regardless of head tilt, scale, or distance — the face always looks the same to PCA and LDA. This is why the pipeline works.</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 6: PCA INTRO ══ -->
+<div class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">6 / 16</div>
+    <div class="big-title">PCA — Overview</div>
+    <hr class="title-line">
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Problem:</b> 10,000-D space with 325 training images = <b>Curse of Dimensionality</b>. Model memorises instead of learning.</span></div>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Solution:</b> PCA finds the 50 directions of greatest variance → compresses 10,000 → 50 keeping 93.6% of information.</span></div>
+    <div class="div"></div>
+    <div class="section-banner">· Steps ·</div>
+    <div class="ni"><span class="nd">1</span><span class="nt">Grayscale: <span class="fb blue" style="display:inline;padding:.2rem .5rem;border-radius:6px">\(\text{Gray} = 0.587G + 0.299R + 0.114B\)</span></span></div>
+    <div class="ni"><span class="nd">2</span><span class="nt">Global Mean: \(\mu = \frac{1}{M}\sum x_i\) — the "average face"</span></div>
+    <div class="ni"><span class="nd">3</span><span class="nt">Mean-Centering: \(\Phi_i = x_i - \mu\) → Matrix A (point cloud)</span></div>
+    <div class="ni"><span class="nd">4</span><span class="nt">Covariance: \(C = \frac{1}{M}A \cdot A^T\) — "do pixel i and j move together?"</span></div>
+    <div class="ni"><span class="nd">5</span><span class="nt">Eigenvectors: \(C \cdot u = \lambda \cdot u\) → 10,000 directions, keep best 50</span></div>
+    <div class="ni"><span class="nd">6</span><span class="nt">Projection: \(w = U_k^T \cdot (x - \mu)\) → fingerprint = 50 numbers</span></div>
+    <div class="sticky" style="margin-top:.8rem">💡 Each eigenvector drawn as 100×100 image = Eigenface. Each w_k = "how much of Eigenface k is in this face?"</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 7: PCA FORMULAS ══ -->
+<div class="slide" id="s7">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">7 / 16</div>
+    <div class="big-title">PCA — Key Equations</div>
+    <hr class="title-line">
+    <div class="sg2">
+      <div>
+        <div class="section-banner">· Covariance ·</div>
+        <div class="fb teal">$$C = \frac{1}{M} \cdot A \cdot A^T$$</div>
+        <table class="st">
+          <tr><td>C[i,j] large +</td><td>pixels rise together → merge</td></tr>
+          <tr><td>C[i,j] large −</td><td>opposite movement → merge</td></tr>
+          <tr><td>C[i,j] ≈ 0</td><td>independent → keep both</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="section-banner">· Eigenvectors ·</div>
+        <div class="fb violet">$$C \cdot u = \lambda \cdot u$$</div>
+        <div class="section-banner" style="margin-top:.8rem">· Projection ·</div>
+        <div class="fb violet">$$w = U_k^T \cdot (x - \mu)$$</div>
+        <table class="st">
+          <tr><td>\(U_k\)</td><td>matrix of 50 eigenvectors</td></tr>
+          <tr><td>\(w\)</td><td>50-number fingerprint</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sc"><div class="big">10k</div><div class="lbl">dimensions in</div></div>
+      <div class="sc"><div class="big" style="color:var(--teal)">50</div><div class="lbl">dimensions out</div></div>
+      <div class="sc"><div class="big" style="color:var(--violet)">93.6%</div><div class="lbl">variance kept</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 8: LDA OVERVIEW ══ -->
+<div class="slide" id="s8">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">8 / 16</div>
+    <div class="big-title">LDA — Overview</div>
+    <hr class="title-line">
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Problem with PCA alone:</b> PCA captures largest variance = often lighting, not identity. Same person in bright vs dark → PCA sees two strangers.</span></div>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>LDA is supervised</b> — it knows identities from dataset labels. Input: <b>50 numbers from PCA</b>. Output: <b>5 numbers</b>.</span></div>
+    <div class="div"></div>
+    <table class="cmp">
+      <tr><th></th><th>PCA</th><th>LDA</th></tr>
+      <tr><td><b>Knows identities?</b></td><td>✗ Unsupervised</td><td>✓ Supervised</td></tr>
+      <tr><td><b>Maximises</b></td><td>Total variance</td><td>Between/Within ratio</td></tr>
+      <tr><td><b>Output dims</b></td><td>50</td><td>5 (= n_classes − 1)</td></tr>
+    </table>
+    <div class="good">LDA goal: same-person images <b>cluster together</b> AND different-person images are <b>far apart</b> in the projected space.</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 9: LDA FORMULAS ══ -->
+<div class="slide" id="s9">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">9 / 16</div>
+    <div class="big-title">LDA — Equations</div>
+    <hr class="title-line">
+    <div class="sg2">
+      <div>
+        <div class="section-banner">· Class Mean ·</div>
+        <div class="fb teal">$$\mu_c = \frac{1}{n_c}\sum_{x \in X_c} x$$</div>
+        <div class="section-banner" style="margin-top:.8rem">· Within-Class Scatter ·</div>
+        <div class="fb coral">$$S^W = \sum_c\sum_x(x-\mu_c)(x-\mu_c)^T$$</div>
+        <div class="warn" style="font-size:.85rem">Want Sᵂ <b>SMALL</b> — same person clustered tightly</div>
+      </div>
+      <div>
+        <div class="section-banner">· Between-Class Scatter ·</div>
+        <div class="fb teal">$$S_B = \sum_c n_c(\mu_c-\mu)(\mu_c-\mu)^T$$</div>
+        <div class="good" style="font-size:.85rem">Want Sʙ <b>LARGE</b> — people far from each other</div>
+        <div class="section-banner" style="margin-top:.8rem">· Fisher Criterion + Solution ·</div>
+        <div class="fb violet">$$J(w)=\frac{w^TS_Bw}{w^TS^Ww}$$</div>
+        <div class="fb violet">$$(S^W)^{-1}S_B \cdot w = \lambda w$$</div>
+      </div>
+    </div>
+    <div class="sticky">💡 Why PCA before LDA? Direct LDA on 10k dims → Sᵂ is 10k×10k singular matrix (not invertible). PCA compresses to 50 first → solvable.</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10: SVM ══ -->
+<div class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">10 / 16</div>
+    <div class="big-title">SVM Classification</div>
+    <hr class="title-line">
+    <div class="ni"><span class="nd">—</span><span class="nt">Input: <b>5 numbers from LDA</b>. Draws decision boundaries with <span class="t">Maximum Margin</span> between classes.</span></div>
+    <div class="sg2">
+      <div>
+        <div class="section-banner">· Margin Objective ·</div>
+        <div class="fb blue">$$\min \frac{1}{2}\|w\|^2 + C\sum\xi_i$$</div>
+        <table class="st">
+          <tr><td>C = 10</td><td>penalty — chosen by grid search</td></tr>
+          <tr><td>Support Vectors</td><td>closest points to boundary</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="section-banner">· RBF Kernel ·</div>
+        <div class="fb teal">$$K(x,y)=\exp(-\gamma\|x-y\|^2)$$</div>
+        <div class="section-banner" style="margin-top:.6rem">· Platt Scaling ·</div>
+        <div class="fb amber">$$P=\frac{1}{1+\exp(A\cdot f(z)+B)}$$</div>
+      </div>
+    </div>
+    <div class="fb coral" style="margin-top:.5rem">$$\hat{c} = \begin{cases}\text{name} & P \geq 0.40 \\ \text{Unknown} & P < 0.40\end{cases}$$</div>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>RBF</b> handles non-linear boundaries. <b>Platt</b> converts raw SVM score → real probability needed for Unknown rejection.</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 11: FEATURES ══ -->
+<div class="slide" id="s11">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">11 / 16</div>
+    <div class="big-title">Two Types of Features</div>
+    <hr class="title-line">
+    <div class="sg2">
+      <div style="background:rgba(0,137,123,.05);border:1.5px solid rgba(0,137,123,.15);border-radius:12px;padding:1rem">
+        <div class="section-banner">· Geometric Features ·</div>
+        <div class="ni"><span class="nd">—</span><span class="nt">MediaPipe's 6 keypoints: eye, eye, nose, mouth, ears.</span></div>
+        <div class="ni"><span class="nd">—</span><span class="nt"><b>Used only for alignment</b> — discarded after the affine warp.</span></div>
+        <div class="warn" style="font-size:.85rem">NOT used for identification — only 6 keypoints, too coarse.</div>
+      </div>
+      <div style="background:rgba(106,27,154,.05);border:1.5px solid rgba(106,27,154,.15);border-radius:12px;padding:1rem">
+        <div class="section-banner">· Appearance Features ·</div>
+        <div class="ni"><span class="nd">—</span><span class="nt">PCA projects onto 50 Eigenfaces → 50 projection coefficients.</span></div>
+        <div class="ni"><span class="nd">—</span><span class="nt">LDA further compresses to 5 discriminative dimensions.</span></div>
+        <div class="good" style="font-size:.85rem">These ARE used for identification — w vector = face fingerprint.</div>
+      </div>
+    </div>
+    <div class="info" style="margin-top:1rem"><b>Defense answer:</b> Two types. Geometric features (keypoints) are used only for alignment, then discarded. Appearance features (PCA→LDA projection) are used for identification.</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 12: RESULTS ══ -->
+<div class="slide" id="s12">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">12 / 16</div>
+    <div class="big-title">Results</div>
+    <hr class="title-line">
+    <div class="sg">
+      <div class="sc"><div class="big">98.78%</div><div class="lbl">test accuracy</div></div>
+      <div class="sc"><div class="big" style="color:var(--teal)">97.06%</div><div class="lbl">5-fold CV ± 2.51%</div></div>
+      <div class="sc"><div class="big" style="color:var(--coral)">1/82</div><div class="lbl">misclassifications</div></div>
+    </div>
+    <table class="dt" style="margin-top:.8rem">
+      <tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th></tr>
+      <tr><td>Abdu2</td><td>0.909</td><td>1.000</td><td>0.952</td></tr>
+      <tr><td>Ahmad</td><td>1.000</td><td>0.833</td><td>0.909</td></tr>
+      <tr><td>Aseel, abod, aziz, Unknown</td><td colspan="3" style="color:var(--teal)">1.000 / 1.000 / 1.000</td></tr>
+      <tr style="background:rgba(26,35,126,.06)"><td><b>Macro avg</b></td><td><b>0.985</b></td><td><b>0.972</b></td><td><b>0.977</b></td></tr>
+    </table>
+    <div class="sticky">💡 The single error: Ahmad predicted as Abdu2 — because both have similar bright-skewed pixel intensity (180–220). Structurally predicted by the LDA scatter plot.</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 13: CLUSTERING ══ -->
+<div class="slide" id="s13">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">13 / 16</div>
+    <div class="big-title">LDA Clustering</div>
+    <hr class="title-line">
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>Does the model cluster?</b> Implicitly yes — LDA produces a space where same-person faces naturally cluster. SVM learns boundaries between those clusters.</span></div>
+    <div class="div"></div>
+    <div class="section-banner">· From the LDA Scatter Plot ·</div>
+    <div class="ni"><span class="nd">✓</span><span class="nt"><span class="g">abod</span> — tight isolated cluster (top right) → perfect precision and recall.</span></div>
+    <div class="ni"><span class="nd">✓</span><span class="nt"><span class="g">aziz</span> — isolated cluster (bottom right) → perfect precision and recall.</span></div>
+    <div class="ni"><span class="nd">✓</span><span class="nt"><span class="g">Unknown</span> — large but well-separated from all named classes.</span></div>
+    <div class="ni"><span class="nd">⚠</span><span class="nt"><span style="color:var(--coral)">Abdu2, Ahmad, Aseel</span> — overlapping central region → source of the single error.</span></div>
+    <div class="info" style="margin-top:.8rem"><b>Defense answer:</b> Clustering happens implicitly as a side effect of LDA's optimization. LDA maximises between-class scatter over within-class scatter — mathematically equivalent to a soft clustering objective. The SVM classifies in the resulting clustered space.</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 14: COMPARISON ══ -->
+<div class="slide" id="s14">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">14 / 16</div>
+    <div class="big-title">Why Fisherfaces?</div>
+    <hr class="title-line">
+    <table class="cmp">
+      <tr><th>Approach</th><th>Strength</th><th>Weakness</th><th>Chosen?</th></tr>
+      <tr><td>Eigenfaces (PCA only)</td><td>Simple, fast</td><td>Captures lighting ≠ identity</td><td>✗</td></tr>
+      <tr><td>LBPH</td><td>Lighting robust</td><td>No discriminative training</td><td>✗</td></tr>
+      <tr style="background:rgba(0,137,123,.06)"><td><b>Fisherfaces</b></td><td><b>Discriminative, small-data, CPU, transparent</b></td><td>Lighting sensitive</td><td><b>✓</b></td></tr>
+      <tr><td>FaceNet / ArcFace</td><td>State-of-art, robust</td><td>GPU, black-box, needs millions of images</td><td>Future Work</td></tr>
+    </table>
+    <div class="ni"><span class="nd">—</span><span class="nt"><b>3 reasons:</b> <span class="t">Transparency</span> (every step explainable visually) · <span class="t">Data efficiency</span> (325 samples) · <span class="t">Hardware</span> (CPU-only, 150ms).</span></div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 15: LIMITATIONS ══ -->
+<div class="slide" id="s15">
+  <div class="slide-inner">
+    <div class="rings"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+    <div class="slide-num">15 / 16</div>
+    <div class="big-title">Limitations & Future Work</div>
+    <hr class="title-line">
+    <div class="sg2">
+      <div>
+        <div class="section-banner">· Limitations ·</div>
+        <div class="ni"><span class="nd">⚠</span><span class="nt"><b>Lighting:</b> significant change → model outputs Unknown (documented in real test).</span></div>
+        <div class="ni"><span class="nd">⚠</span><span class="nt"><b>Pose:</b> yaw/pitch >30° → MediaPipe keypoints fail.</span></div>
+        <div class="ni"><span class="nd">⚠</span><span class="nt"><b>Occlusion:</b> mask, glasses, hair covering keypoints.</span></div>
+        <div class="ni"><span class="nd">⚠</span><span class="nt"><b>Closed-world bias:</b> similar-looking stranger may be misclassified as a registered person.</span></div>
+      </div>
+      <div>
+        <div class="section-banner">· Future Work v2 ·</div>
+        <div class="ni"><span class="nd">→</span><span class="nt">Keep MediaPipe + Affine Alignment.</span></div>
+        <div class="ni"><span class="nd">→</span><span class="nt">Replace PCA+LDA with <span class="v">FaceNet / ArcFace</span> — 128/512-D deep embedding.</span></div>
+        <div class="ni"><span class="nd">→</span><span class="nt">Lighting robustness, one-shot enrollment, better Ahmad↔Abdu2 separation.</span></div>
+        <div class="good" style="font-size:.85rem">Deep embeddings learn structural features, not pixel intensity → immune to the single error we observed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 16: THANK YOU ══ -->
+<div class="slide" id="s16">
+  <div class="cover-inner">
+    <div class="cover-title" style="font-size:2.4rem">Thank You</div>
+    <div class="cover-sub" style="margin-bottom:1.5rem">Face Detection & Recognition — CPCS-331 · KAU</div>
+    <div class="sg" style="width:100%;max-width:700px;position:relative">
+      <div class="sc" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)">
+        <div class="big" style="color:var(--teal)">98.78%</div>
+        <div class="lbl" style="color:rgba(255,255,255,.6)">Test Accuracy</div>
+      </div>
+      <div class="sc" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)">
+        <div class="big" style="color:#fff">81/82</div>
+        <div class="lbl" style="color:rgba(255,255,255,.6)">Correct</div>
+      </div>
+      <div class="sc" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15)">
+        <div class="big" style="color:var(--amber)">97.06%</div>
+        <div class="lbl" style="color:rgba(255,255,255,.6)">5-Fold CV</div>
+      </div>
+    </div>
+    <div class="badges" style="margin-top:1.5rem">
+      <span class="cover-badge">PCA — 50 components</span>
+      <span class="cover-badge">LDA — 5 components</span>
+      <span class="cover-badge">SVM C=10 γ=scale</span>
+      <span class="cover-badge">MediaPipe + Affine</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides -->
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>←</button>
+  <span class="nav-counter" id="counter">1 / 16</span>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">→</button>
+</div>
+<div class="key-hint">← → or Space</div>
+
+<script>
+const total = 16;
+let cur = 1;
+
+function go(dir) {
+  const next = cur + dir;
+  if (next < 1 || next > total) return;
+  document.getElementById('s' + cur).classList.remove('active');
+  cur = next;
+  document.getElementById('s' + cur).classList.add('active');
+  document.getElementById('counter').textContent = cur + ' / ' + total;
+  document.getElementById('prevBtn').disabled = cur === 1;
+  document.getElementById('nextBtn').disabled = cur === total;
+  document.getElementById('prog').style.width = (cur / total * 100) + '%';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') go(1);
+  if (e.key === 'ArrowLeft') go(-1);
+});
+
+document.getElementById('prog').style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>

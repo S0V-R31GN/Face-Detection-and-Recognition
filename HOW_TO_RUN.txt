@@ -1,0 +1,403 @@
+═══════════════════════════════════════════════════════════════════════════════
+  HOW TO RUN — Face Detection and Recognition System
+  CPCS-331 Major Project
+═══════════════════════════════════════════════════════════════════════════════
+
+This file explains:
+  • Required Python libraries
+  • How to set up the project and enter the virtual environment
+  • How to run the main web application
+  • What each page in the web application does
+  • How to run the three analysis scripts (eda, evaluate, hypertune)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  1. REQUIREMENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+The project requires Python 3.10, 3.11, or 3.12.
+(Python 3.13+ is NOT supported because MediaPipe does not have a wheel for it.)
+
+The following Python libraries are required:
+
+    flask
+    opencv-python
+    opencv-contrib-python
+    numpy
+    scikit-learn
+    Pillow
+    mediapipe
+    pandas
+    seaborn
+    matplotlib
+
+All libraries can be installed in one command (see step 4 below).
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  2. SETUP — FIRST TIME ONLY
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1 — Open Command Prompt (cmd) and navigate to the project folder.
+
+    Example (Windows):
+
+        cd C:\Users\<username>\Desktop\Project\2nd_site_Attendance
+
+    Replace the path with wherever you extracted the project folder.
+
+
+STEP 2 — Create a virtual environment (only needed the first time).
+
+    Type the following command and press Enter:
+
+        python -m venv venv
+
+    This creates a new folder named "venv" inside your project folder.
+    The virtual environment keeps the project's libraries separate from
+    other Python projects on your computer.
+
+
+STEP 3 — Activate the virtual environment.
+
+    On Windows, type:
+
+        venv\Scripts\activate
+
+    On macOS or Linux, type:
+
+        source venv/bin/activate
+
+    After activation, your command prompt will show "(venv)" at the
+    beginning of each line, like this:
+
+        (venv) C:\Users\...\2nd_site_Attendance>
+
+    This means the virtual environment is now active.
+
+    NOTE: You must activate the environment EVERY TIME you open a new
+    Command Prompt window to work on this project.
+
+
+STEP 4 — Install all required libraries (only needed the first time).
+
+    With the virtual environment activated, type:
+
+        pip install flask opencv-python opencv-contrib-python numpy scikit-learn Pillow mediapipe pandas seaborn matplotlib
+
+    This will download and install all libraries. It takes 1–3 minutes
+    depending on your internet speed. MediaPipe is the largest library
+    (about 80 MB).
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  3. RUNNING THE MAIN WEB APPLICATION (app.py)
+═══════════════════════════════════════════════════════════════════════════════
+
+Once setup is complete, running the web application is simple:
+
+STEP 1 — Open Command Prompt and navigate into the project folder.
+
+        cd C:\Users\<username>\Desktop\Project\2nd_site_Attendance
+
+
+STEP 2 — Activate the virtual environment.
+
+        venv\Scripts\activate
+
+
+STEP 3 — Start the Flask web server.
+
+        python app.py
+
+
+STEP 4 — Wait for the server to start. You will see output like:
+
+        ================================================================
+          Site 2 — Attendance System
+          Model     : loaded
+          Algorithm : MediaPipe → Align → PCA → LDA → SVM (RBF)
+          URL       : http://127.0.0.1:5000
+        ================================================================
+
+         * Running on http://127.0.0.1:5000
+
+
+STEP 5 — Copy the URL (http://127.0.0.1:5000) and paste it into any
+         modern web browser (Chrome, Edge, Firefox).
+
+         The website will open and the application is ready to use.
+
+
+STEP 6 — To STOP the server, press Ctrl+C in the Command Prompt window.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  4. WHAT EACH PAGE DOES
+═══════════════════════════════════════════════════════════════════════════════
+
+The website has four main tabs at the top:
+
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ TAB 1 — LIVE CAMERA                                                  │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  Purpose:
+      Real-time face recognition using the webcam, with automatic
+      attendance logging.
+
+  How to use it:
+      1. Click the "Start Camera" button.
+      2. Allow camera permission when the browser asks.
+      3. The webcam feed appears with green boxes drawn around any
+         recognized faces, labeled with the person's name and a
+         confidence percentage.
+      4. If a face is not recognized, the box is red and labeled
+         "Unknown".
+      5. Every recognized person is automatically logged in the
+         attendance database (once per day).
+      6. Use the threshold slider on the right to adjust how strict
+         the system is. Lower threshold = more recognitions, more
+         false positives. Higher threshold = stricter, more "Unknown".
+      7. Click "Stop" to turn off the camera.
+
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ TAB 2 — UPLOAD PHOTO                                                 │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  Purpose:
+      Identify faces in a photograph uploaded from disk.
+      This mode does NOT log attendance.
+
+  How to use it:
+      1. Click the drop zone or drag a photo onto it.
+      2. The selected photo appears in the preview area.
+      3. Click "Identify Faces".
+      4. The system processes the image and shows it with green/red
+         boxes drawn around each detected face, with names and
+         confidence scores.
+      5. A list of all detected faces appears on the right.
+
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ TAB 3 — MANAGE PEOPLE                                                │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  Purpose:
+      Add new people to the dataset, view existing people, delete
+      people, and retrain the model.
+
+  How to use it (three sub-features):
+
+      A — Capture from webcam (recommended):
+          1. Type the person's name in the text box.
+          2. Choose how many frames to capture (default: 30).
+          3. Click "Start Capture".
+          4. The person slowly moves their head (left, right, up,
+             down) and varies expression while the system captures
+             frames.
+          5. When done, frames are uploaded automatically.
+
+      B — Upload existing photos:
+          1. Type the person's name.
+          2. Select one or more image files.
+          3. Click "Upload Photos".
+
+      C — Retrain the model:
+          1. After adding or removing people, click "Retrain Model".
+          2. Wait a few seconds — the system rebuilds the PCA, LDA,
+             and SVM model using the updated dataset.
+          3. Statistics (number of samples, train/test accuracy, etc.)
+             appear in the green stats box.
+
+      To delete a person: click the red ✕ button next to their name
+      in the "People in Dataset" section. Retrain afterward.
+
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ TAB 4 — ATTENDANCE LOG                                               │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  Purpose:
+      View the history of attendance records.
+
+  How to use it:
+      1. Statistics at the top show: Today / This Week / All Time /
+         Unique People.
+      2. The table below shows every attendance record with name,
+         date, time, and the confidence score at the time of
+         recognition.
+      3. Click "Refresh" to reload the data.
+      4. Click "Clear All" to delete every record (with confirmation).
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  5. RUNNING THE ANALYSIS SCRIPTS
+═══════════════════════════════════════════════════════════════════════════════
+
+Five additional Python scripts are included in the same folder as app.py:
+
+    run.py            — Optional one-click launcher (alternative to app.py)
+    eda.py            — Exploratory Data Analysis (generates 4 chart images)
+    evaluate.py       — Model evaluation (generates confusion matrix + report)
+    hypertune.py      — Hyperparameter optimization (grid search)
+    extra_visuals.py  — Extra report figures (LDA clusters, mean face, etc.)
+
+Each script is run the SAME WAY as app.py:
+
+
+STEP 1 — Open Command Prompt and navigate into the project folder.
+
+        cd C:\Users\<username>\Desktop\Project\2nd_site_Attendance
+
+
+STEP 2 — Activate the virtual environment.
+
+        venv\Scripts\activate
+
+
+STEP 3 — Run the desired script. For example:
+
+        python eda.py
+
+   or:
+
+        python evaluate.py
+
+   or:
+
+        python hypertune.py
+
+
+STEP 4 — Each script prints its progress in the Command Prompt and
+         saves its output files in the same project folder.
+
+         (Unlike app.py, these scripts do NOT start a web server.
+         They run, generate files, and exit when finished.)
+
+
+─────────────────────────────────────────────────────────────────────────────
+  WHAT EACH SCRIPT DOES
+─────────────────────────────────────────────────────────────────────────────
+
+  run.py
+      Purpose: Convenience launcher that installs the required libraries
+               (if any are missing) and then starts app.py in one step.
+               Useful for the very first run on a fresh machine.
+      Run time: depends on whether libraries need to be installed
+                (a few seconds if already installed, 1–3 minutes if not).
+
+      Outputs: none — it simply launches the Flask web server, after
+               which it behaves exactly like running "python app.py"
+               manually (open http://127.0.0.1:5000 in a browser).
+
+      Note: running "pip install ..." followed by "python app.py"
+            (as described in Section 3 above) does exactly the same
+            thing. Use run.py only as a shortcut.
+
+
+  eda.py
+      Purpose: Explore the dataset and produce four diagnostic charts.
+      Run time: about 30 seconds.
+
+      Outputs (saved in the project folder):
+          eda_class_distribution.png   bar chart — images per class
+          eda_sample_grid.png          one sample image per class
+          eda_image_dimensions.png     scatter plot of image sizes
+          eda_pixel_intensities.png    pixel intensity histogram per class
+
+
+  evaluate.py
+      Purpose: Evaluate the trained model on the held-out test set.
+      Run time: about 30 seconds.
+      Requires: model.pkl must already exist (i.e. train the model first
+                using the website's "Retrain Model" button).
+
+      Outputs (saved in the project folder):
+          confusion_matrix.png         heatmap of true vs predicted classes
+          classification_report.txt    per-class precision / recall / F1
+          eigenfaces.png               first 16 PCA components visualized
+
+
+  hypertune.py
+      Purpose: Perform grid search over SVM and PCA hyperparameters
+               using 5-fold cross-validation, to find the best
+               configuration.
+      Run time: 1–3 minutes (it trains 48 models internally).
+
+      Outputs (saved in the project folder):
+          hyperparameter_results.csv   full table of all 48 configurations
+          best_params.txt              the winning configuration
+          top_10_configs.png           bar chart of the top 10 configs
+
+
+  extra_visuals.py
+      Purpose: Generate five additional visualizations used in the
+               report and presentation to explain the pipeline visually.
+      Run time: about 30–60 seconds.
+      Requires: dataset/ folder must contain training images.
+
+      Outputs (saved in the project folder):
+          lda_clusters.png         2D scatter showing how LDA separates
+                                   each person into a distinct cluster
+                                   (the headline visual for the report)
+          pca_variance_curve.png   cumulative explained variance vs
+                                   number of PCA components (justifies
+                                   why 50 components were chosen)
+          mean_face.png            the average face computed across the
+                                   entire training set (the "centroid"
+                                   that PCA subtracts before projection)
+          alignment_demo.png       side-by-side BEFORE/AFTER showing a
+                                   raw image with MediaPipe keypoints
+                                   next to the affine-warped 100×100
+                                   grayscale aligned output
+          pipeline_demo.png        one real face shown going through
+                                   every stage of the pipeline: raw
+                                   input → detection → alignment →
+                                   PCA reconstruction
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  6. TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEM:  ModuleNotFoundError: No module named 'mediapipe'  (or other library)
+SOLUTION: The virtual environment is not activated, or libraries are not
+          installed. Run: venv\Scripts\activate
+                          pip install <missing library>
+
+PROBLEM:  "Python is not recognized as an internal or external command"
+SOLUTION: Python is not installed or not in your PATH. Install Python 3.12
+          from python.org and make sure to check "Add Python to PATH"
+          during installation.
+
+PROBLEM:  Browser shows "This site can't be reached"
+SOLUTION: The Flask server is not running. Go back to Command Prompt and
+          make sure you ran "python app.py" and the URL appeared.
+
+PROBLEM:  Camera permission denied in browser
+SOLUTION: Click the camera/lock icon in the browser address bar, change
+          Camera to "Allow", then refresh the page.
+
+PROBLEM:  Live camera shows nothing / no green boxes
+SOLUTION: Hard-refresh the browser with Ctrl+Shift+R to clear cached files.
+
+PROBLEM:  sqlite3.OperationalError: table logs has no column named confidence
+SOLUTION: The attendance.db file is from an older version. Stop the server,
+          delete attendance.db, and restart. A new database will be created
+          automatically.
+
+PROBLEM:  Recognition labels everyone as "Unknown"
+SOLUTION: The confidence threshold is too high. In the Live Camera tab,
+          drag the threshold slider down to around 35–40.
+
+PROBLEM:  Recognition labels a stranger as a known person
+SOLUTION: The Unknown class needs more training data. Add more images to
+          the dataset/Unknown folder and retrain.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  END OF DOCUMENT
+═══════════════════════════════════════════════════════════════════════════════
