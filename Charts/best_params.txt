@@ -1,0 +1,10 @@
+BEST HYPERPARAMETER CONFIGURATION
+==================================================
+
+  pca__n_components         = 50
+  svm__C                    = 10
+  svm__gamma                = scale
+
+  Best CV accuracy        = 97.06%
+  Total configs tested    = 48
+  Cross-validation folds  = 5

@@ -1,0 +1,15 @@
+Test accuracy: 98.78%
+Test samples:  82
+
+              precision    recall  f1-score   support
+
+       Abdu2      0.909     1.000     0.952        10
+       Ahmad      1.000     0.833     0.909         6
+       Aseel      1.000     1.000     1.000         6
+     Unknown      1.000     1.000     1.000        40
+        abod      1.000     1.000     1.000        10
+        aziz      1.000     1.000     1.000        10
+
+    accuracy                          0.988        82
+   macro avg      0.985     0.972     0.977        82
+weighted avg      0.989     0.988     0.988        82
