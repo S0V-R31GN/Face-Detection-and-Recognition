@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Attendance System — AI Face Recognition</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0a0f; --surface:#111118; --card:#16161f; --border:#2a2a3a;
+  --accent:#6ee7b7; --accent2:#818cf8; --danger:#f87171;
+  --warning:#fbbf24; --success:#34d399; --text:#e2e8f0; --muted:#64748b;
+  --radius:14px; --mono:'Space Mono',monospace; --sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body {
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  font-size:15px; line-height:1.6; min-height:100vh; overflow-x:hidden;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:linear-gradient(rgba(110,231,183,.03) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(110,231,183,.03) 1px,transparent 1px);
+  background-size:40px 40px; pointer-events:none; z-index:0;
+}
+.wrapper { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 24px 80px; }
+header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:32px 0; border-bottom:1px solid var(--border);
+  margin-bottom:36px; gap:16px; flex-wrap:wrap;
+}
+.logo { display:flex; align-items:center; gap:14px; }
+.logo-icon {
+  width:48px; height:48px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:12px; display:grid; place-items:center; font-size:22px;
+}
+.logo-text h1 { font-family:var(--mono); font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+.logo-text p  { font-size:12px; color:var(--muted); font-family:var(--mono); margin-top:2px; }
+.status-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 14px; border-radius:999px;
+  background:var(--card); border:1px solid var(--border);
+  font-size:12px; font-family:var(--mono);
+}
+.status-dot { width:8px; height:8px; border-radius:50%; background:var(--muted); transition:0.3s; }
+.status-pill.trained .status-dot { background:var(--success); box-shadow:0 0 12px var(--success); }
+.tabs { display:flex; gap:4px; margin-bottom:28px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.tab-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:12px 20px; background:none; border:none; color:var(--muted);
+  font-family:var(--sans); font-size:14px; font-weight:500;
+  cursor:pointer; border-bottom:2px solid transparent; transition:0.2s;
+}
+.tab-btn:hover { color:var(--text); }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-icon { font-size:16px; }
+.panel { display:none; animation:fadeIn 0.3s; }
+.panel.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:none;} }
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:20px; }
+.card-title { font-family:var(--mono); font-size:13px; color:var(--muted); margin-bottom:16px; letter-spacing:0.5px; text-transform:uppercase; }
+.card-title strong { color:var(--text); }
+.btn {
+  display:inline-flex; align-items:center; gap:8px; justify-content:center;
+  padding:11px 20px; border:1px solid var(--border);
+  border-radius:10px; background:var(--surface); color:var(--text);
+  font-family:var(--sans); font-size:14px; font-weight:500;
+  cursor:pointer; transition:0.15s; text-decoration:none;
+}
+.btn:hover:not(:disabled) { background:var(--card); border-color:var(--accent); }
+.btn:disabled { opacity:0.5; cursor:not-allowed; }
+.btn-primary { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+.btn-primary:hover:not(:disabled) { background:#5dd4a3; border-color:#5dd4a3; }
+.btn-danger { background:var(--danger); color:white; border-color:var(--danger); }
+.btn-danger:hover:not(:disabled) { background:#e95252; }
+.btn-sm { padding:6px 12px; font-size:13px; }
+.btn-block { width:100%; }
+input[type="text"], input[type="number"], select {
+  width:100%; padding:11px 14px; background:var(--surface);
+  border:1px solid var(--border); border-radius:10px; color:var(--text);
+  font-family:var(--sans); font-size:14px;
+}
+input:focus { outline:none; border-color:var(--accent); }
+.threshold-wrap { display:flex; align-items:center; gap:14px; padding:8px 0; }
+.threshold-wrap input[type="range"] { flex:1; accent-color:var(--accent); }
+.threshold-val { font-family:var(--mono); font-weight:700; color:var(--accent); min-width:40px; text-align:right; font-size:16px; }
+.spinner {
+  display:inline-block; width:14px; height:14px;
+  border:2px solid currentColor; border-right-color:transparent;
+  border-radius:50%; animation:spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+#toast-container { position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px; }
+.toast {
+  padding:12px 18px; border-radius:10px; background:var(--card);
+  border:1px solid var(--border); display:flex; align-items:center; gap:10px;
+  font-size:14px; min-width:240px; animation:slideIn 0.3s;
+}
+.toast.success { border-color:var(--success); }
+.toast.error { border-color:var(--danger); }
+@keyframes slideIn { from { transform:translateX(110%); } to { transform:none; } }
+
+.cam-grid { display:grid; grid-template-columns:1fr 360px; gap:20px; }
+@media (max-width:900px) { .cam-grid { grid-template-columns:1fr; } }
+
+/* ═══ VIDEO STAGE — UPDATED FOR CANVAS OVERLAY ═══ */
+.video-stage {
+  position:relative; background:#000; border-radius:var(--radius);
+  overflow:hidden; border:1px solid var(--border);
+  aspect-ratio:4/3; min-height:320px;
+}
+.video-stage video, .video-stage img, .video-stage canvas {
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:contain; display:block;
+}
+.video-stage canvas { pointer-events:none; }   /* don't block clicks */
+.video-stage video.hidden, .video-stage img.hidden, .video-stage canvas.hidden { display:none; }
+
+.video-placeholder {
+  position:absolute; inset:0; display:grid; place-items:center;
+  color:var(--muted); pointer-events:none; text-align:center;
+}
+.video-placeholder .ph-icon { font-size:56px; opacity:0.3; margin-bottom:12px; }
+
+.live-badge {
+  position:absolute; top:14px; left:14px; padding:6px 12px; border-radius:6px;
+  background:rgba(239,68,68,0.95); color:white;
+  font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:1px;
+  display:none; align-items:center; gap:6px; z-index:10;
+}
+.live-badge.show { display:inline-flex; }
+.live-badge::before {
+  content:''; width:8px; height:8px; background:white; border-radius:50%;
+  animation:pulse 1s infinite;
+}
+@keyframes pulse { 50% { opacity:0.4; } }
+
+.results-stack { display:flex; flex-direction:column; gap:10px; }
+.result-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-left:3px solid var(--success); border-radius:10px;
+  padding:12px 14px; display:flex; align-items:center; gap:12px;
+}
+.result-card.unknown { border-left-color:var(--danger); }
+.result-icon { font-size:24px; }
+.result-info { flex:1; min-width:0; }
+.result-name { font-weight:600; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.result-meta { font-size:12px; color:var(--muted); font-family:var(--mono); }
+.result-conf { font-family:var(--mono); font-weight:700; color:var(--accent); }
+.result-conf.low { color:var(--danger); }
+.attendance-tag { font-size:11px; padding:2px 8px; border-radius:4px; font-family:var(--mono); font-weight:600; margin-top:4px; display:inline-block; }
+.attendance-tag.logged { background:rgba(52,211,153,.15); color:var(--success); }
+.attendance-tag.already { background:rgba(129,140,248,.15); color:var(--accent2); }
+.attendance-tag.na { background:rgba(100,116,139,.15); color:var(--muted); }
+
+.empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.empty-icon { font-size:42px; opacity:0.3; margin-bottom:8px; }
+
+.drop-zone {
+  border:2px dashed var(--border); border-radius:12px;
+  padding:32px 20px; text-align:center; cursor:pointer; transition:0.2s; position:relative;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color:var(--accent); background:rgba(110,231,183,0.04); }
+.drop-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.drop-icon { font-size:36px; opacity:0.5; margin-bottom:10px; }
+.drop-label { font-weight:500; margin-bottom:4px; }
+.drop-sub { font-size:12px; color:var(--muted); }
+
+.persons-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+.person-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:12px; display:flex; align-items:center; gap:10px;
+}
+.person-avatar {
+  width:38px; height:38px; border-radius:50%;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  display:grid; place-items:center; font-size:16px;
+}
+.person-info { flex:1; min-width:0; }
+.person-name { font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.person-count { font-size:11px; color:var(--muted); font-family:var(--mono); }
+
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:16px; }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; font-family:var(--mono); margin-bottom:6px; }
+.stat-value { font-family:var(--mono); font-size:22px; font-weight:700; color:var(--accent); }
+
+.log-table { width:100%; border-collapse:collapse; font-size:14px; }
+.log-table th {
+  text-align:left; padding:12px 14px; background:var(--surface);
+  font-family:var(--mono); font-size:12px; color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid var(--border);
+}
+.log-table td { padding:12px 14px; border-bottom:1px solid var(--border); }
+.log-table tr:last-child td { border-bottom:none; }
+.log-table tr:hover { background:rgba(110,231,183,0.03); }
+
+.capture-progress { width:100%; height:6px; background:var(--surface); border-radius:3px; overflow:hidden; margin:12px 0; }
+.capture-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); width:0%; transition:width 0.2s; }
+
+.notice {
+  padding:12px 14px; background:rgba(129,140,248,0.08);
+  border:1px solid rgba(129,140,248,0.3); border-radius:10px;
+  font-size:13px; color:var(--accent2); margin-bottom:16px;
+}
+.notice.warn { background:rgba(251,191,36,0.08); border-color:rgba(251,191,36,0.3); color:var(--warning); }
+
+/* Train results pretty box */
+.train-results {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:14px; margin-bottom:14px;
+  font-family:var(--mono); font-size:13px;
+}
+.train-results .row { display:flex; justify-content:space-between; padding:4px 0; }
+.train-results .label { color:var(--muted); }
+.train-results .value { color:var(--accent); font-weight:700; }
+.train-results .value.warn { color:var(--warning); }
+.train-results .value.danger { color:var(--danger); }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📋</div>
+      <div class="logo-text">
+        <h1>Attendance System</h1>
+        <p>Live face recognition + attendance logging</p>
+      </div>
+    </div>
+    <div class="status-pill" id="status-pill">
+      <span class="status-dot"></span>
+      <span id="status-text">Loading…</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-live" onclick="switchTab('live')">
+      <span class="tab-icon">🎥</span> Live Camera
+    </button>
+    <button class="tab-btn" id="tab-upload" onclick="switchTab('upload')">
+      <span class="tab-icon">📷</span> Upload Photo
+    </button>
+    <button class="tab-btn" id="tab-manage" onclick="switchTab('manage')">
+      <span class="tab-icon">👤</span> Manage People
+    </button>
+    <button class="tab-btn" id="tab-logs" onclick="switchTab('logs'); loadLogs();">
+      <span class="tab-icon">📊</span> Attendance Log
+    </button>
+  </div>
+
+  <!-- ═══════ PANEL: LIVE CAMERA (Mode A) ═══════ -->
+  <div class="panel active" id="panel-live">
+    <div class="card">
+      <div class="card-title"><strong>Mode A —</strong> Live webcam · attendance is logged automatically</div>
+      <div class="cam-grid">
+
+        <div>
+          <!-- ★ Updated stage: video + canvas overlay (no more "freeze") -->
+          <div class="video-stage" id="video-stage">
+            <video id="cam-video" class="hidden" autoplay playsinline muted></video>
+            <canvas id="cam-overlay" class="hidden"></canvas>
+            <div class="video-placeholder" id="video-placeholder">
+              <div>
+                <div class="ph-icon">📹</div>
+                <p>Click <strong>Start Camera</strong> to begin</p>
+              </div>
+            </div>
+            <div class="live-badge" id="live-badge">LIVE</div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btn-start" onclick="startLive()">▶️ Start Camera</button>
+            <button class="btn btn-danger"  id="btn-stop"  onclick="stopLive()" style="display:none;">⏹️ Stop</button>
+            <span id="live-info" style="margin-left:auto; align-self:center; font-size:13px; color:var(--muted); font-family:var(--mono);">—</span>
+          </div>
+        </div>
+
+        <div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:14px;">
+            <div class="card-title" style="margin-bottom:10px;">Confidence Threshold</div>
+            <div class="threshold-wrap">
+              <span style="font-size:11px; color:var(--muted);">Strict</span>
+              <input type="range" id="live-threshold" min="20" max="90" value="40"
+                     oninput="document.getElementById('live-threshold-val').textContent=this.value"/>
+              <span style="font-size:11px; color:var(--muted);">Lenient</span>
+              <span class="threshold-val" id="live-threshold-val">40</span>
+            </div>
+          </div>
+
+          <div class="card-title">Live Detections</div>
+          <div id="live-results" class="results-stack">
+            <div class="empty"><div class="empty-icon">👁️</div><p style="font-size:13px;">No faces yet</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PANEL: UPLOAD PHOTO (Mode B) ═══════ -->
+  <div class="panel" id="panel-upload">
+    <div class="card">
+      <div class="notice">
+        <strong>Mode B —</strong> Upload a photo to recognize who's in it.
+        This mode does <strong>NOT</strong> log attendance — use Live Camera for that.
+      </div>
+
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px;">
+        <div class="card-title" style="margin-bottom:10px;">Confidence Threshold</div>
+        <div class="threshold-wrap">
+          <span style="font-size:11px; color:var(--muted);">Strict</span>
+          <input type="range" id="up-threshold" min="20" max="90" value="40"
+                 oninput="document.getElementById('up-threshold-val').textContent=this.value"/>
+          <span style="font-size:11px; color:var(--muted);">Lenient</span>
+          <span class="threshold-val" id="up-threshold-val">40</span>
+        </div>
+      </div>
+
+      <div class="cam-grid">
+        <div>
+          <div class="drop-zone" id="drop-up">
+            <input type="file" id="up-file" accept="image/*" onchange="loadUploadImage(this)"/>
+            <div class="drop-icon">🖼️</div>
+            <div class="drop-label">Click or drop a photo here</div>
+            <div class="drop-sub">Any image with faces (single or group)</div>
+          </div>
+
+          <div class="video-stage" style="margin-top:14px; aspect-ratio:4/3;">
+            <img id="up-preview" class="hidden" alt="result"/>
+            <div class="video-placeholder" id="up-placeholder">
+              <div>
+                <div class="ph-icon">📸</div>
+                <p style="font-size:13px;">Annotated result will appear here</p>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-block" id="btn-up-recognize"
+                  onclick="runUpload()" style="margin-top:14px;" disabled>
+            🔍 Identify Faces
+          </button>
+        </div>
+
+        <div>
+          <div class="card-title">Recognition Results</div>
+          <div id="up-results" class="results-stack">
+            <div class="empty"><div class="empty-icon">📷</div><p style="font-size:13px;">Upload a photo to begin</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PANEL: MANAGE PEOPLE ═══════ -->
+  <div class="panel" id="panel-manage">
+
+    <div class="card">
+      <div class="card-title"><strong>Add Person —</strong> Capture from webcam (recommended)</div>
+
+      <div class="cam-grid">
+        <div>
+          <div class="video-stage" id="capture-stage">
+            <video id="cap-video" class="hidden" autoplay playsinline muted></video>
+            <div class="video-placeholder" id="cap-placeholder">
+              <div>
+                <div class="ph-icon">📷</div>
+                <p>Enter a name and click <strong>Start Capture</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="capture-progress" id="cap-progress" style="display:none;">
+            <div class="capture-progress-fill" id="cap-progress-fill"></div>
+          </div>
+          <p id="cap-counter" style="font-family:var(--mono); font-size:13px; color:var(--muted); margin-top:8px; text-align:center;">—</p>
+        </div>
+
+        <div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-family:var(--mono); text-transform:uppercase;">Person's Name</label>
+            <input type="text" id="cap-name" placeholder="e.g. Joe"/>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-family:var(--mono); text-transform:uppercase;">Frames to capture</label>
+            <input type="number" id="cap-count" value="30" min="10" max="100"/>
+          </div>
+
+          <div class="notice" style="font-size:12px;">
+            🎯 <strong>Tips:</strong> Move slowly during capture — turn left, right, up, down. Vary expression (neutral, smile). Better variation = better recognition.
+          </div>
+
+          <button class="btn btn-primary btn-block" id="btn-cap-start" onclick="startCapture()">
+            ▶️ Start Capture
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><strong>Or —</strong> Upload existing photos</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;">
+        <div>
+          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-family:var(--mono); text-transform:uppercase;">Person's Name</label>
+          <input type="text" id="up-name" placeholder="e.g. Sara"/>
+        </div>
+        <div>
+          <label style="font-size:12px; color:var(--muted); display:block; margin-bottom:6px; font-family:var(--mono); text-transform:uppercase;">Photos</label>
+          <input type="file" id="up-images" multiple accept="image/*"/>
+        </div>
+      </div>
+      <button class="btn" id="btn-up-images" onclick="uploadDataset()">📤 Upload Photos</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div class="card-title" style="margin:0;">People In Dataset</div>
+        <button class="btn btn-primary" id="btn-train" onclick="trainModel()">⚡ Retrain Model</button>
+      </div>
+
+      <!-- ★ NEW pretty train-results box -->
+      <div id="train-results" class="train-results" style="display:none;"></div>
+
+      <div id="train-status" style="font-family:var(--mono); font-size:12px; color:var(--muted); margin-bottom:14px; min-height:18px;"></div>
+
+      <div id="persons-grid" class="persons-grid">
+        <div class="empty"><div class="empty-icon">👥</div><p style="font-size:13px;">No people added yet</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ PANEL: ATTENDANCE LOG ═══════ -->
+  <div class="panel" id="panel-logs">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Today</div><div class="stat-value" id="stat-today">0</div></div>
+      <div class="stat-box"><div class="stat-label">This Week</div><div class="stat-value" id="stat-week">0</div></div>
+      <div class="stat-box"><div class="stat-label">All Time</div><div class="stat-value" id="stat-all">0</div></div>
+      <div class="stat-box"><div class="stat-label">Unique People</div><div class="stat-value" id="stat-unique">0</div></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div class="card-title" style="margin:0;">Attendance Records</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm" onclick="loadLogs()">🔄 Refresh</button>
+          <button class="btn btn-sm btn-danger" onclick="clearLogs()">🗑️ Clear All</button>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="log-table">
+          <thead>
+            <tr><th>Name</th><th>Date</th><th>Time</th><th>Confidence</th></tr>
+          </thead>
+          <tbody id="log-body">
+            <tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+/* ═══ STATE ═══ */
+let liveStream = null;
+let liveTimer  = null;
+let liveBusy   = false;
+let capStream  = null;
+
+const FRAME_INTERVAL_MS = 600;     // tighter polling — feels more responsive
+
+/* ═══ TABS ═══ */
+function switchTab(name) {
+  if (name !== 'live'    && liveStream) stopLive();
+  if (name !== 'manage'  && capStream)  stopCaptureStream();
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('tab-'   + name).classList.add('active');
+}
+
+/* ═══ TOAST ═══ */
+function toast(msg, type='info', duration=3500) {
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = '<span>' + (icons[type]||'ℹ️') + '</span><span>' + msg + '</span>';
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+/* ═══ STATUS ═══ */
+async function refreshStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    const pill = document.getElementById('status-pill');
+    const txt  = document.getElementById('status-text');
+    if (d.model_trained) {
+      pill.classList.add('trained');
+      txt.textContent = 'Model ready · ' + d.persons.length + ' person(s)';
+    } else {
+      pill.classList.remove('trained');
+      txt.textContent = 'Model not trained';
+    }
+    renderPersonsList(d.persons || [], d.image_counts || {});
+  } catch (e) {
+    document.getElementById('status-text').textContent = 'Server offline';
+  }
+}
+
+function renderPersonsList(persons, counts) {
+  const el = document.getElementById('persons-grid');
+  if (!persons.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><p style="font-size:13px;">No people added yet</p></div>';
+    return;
+  }
+  el.innerHTML = persons.map(name => `
+    <div class="person-card">
+      <div class="person-avatar">🧑</div>
+      <div class="person-info">
+        <div class="person-name">${escapeHtml(name)}</div>
+        <div class="person-count">${counts[name] || 0} image(s)</div>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="deletePerson('${escapeJs(name)}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeJs(s)   { return String(s).replace(/[\\']/g, '\\$&'); }
+
+/* ═══════════════════════════════════════
+   LIVE CAMERA — with CANVAS OVERLAY (FIX 5)
+═══════════════════════════════════════ */
+async function startLive() {
+  try {
+    liveStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false
+    });
+  } catch (e) {
+    toast('Camera permission denied or no camera available.', 'error');
+    return;
+  }
+
+  const video   = document.getElementById('cam-video');
+  const overlay = document.getElementById('cam-overlay');
+  video.srcObject = liveStream;
+
+  // Show video AND overlay (instead of swapping in annotated img)
+  video.classList.remove('hidden');
+  overlay.classList.remove('hidden');
+
+  document.getElementById('video-placeholder').style.display = 'none';
+  document.getElementById('live-badge').classList.add('show');
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-stop').style.display  = 'inline-flex';
+
+  // Match canvas resolution to video native resolution once metadata loads
+  video.addEventListener('loadedmetadata', () => {
+    overlay.width  = video.videoWidth;
+    overlay.height = video.videoHeight;
+  }, { once: true });
+
+  liveTimer = setInterval(sendLiveFrame, FRAME_INTERVAL_MS);
+}
+
+function stopLive() {
+  if (liveTimer)  { clearInterval(liveTimer); liveTimer = null; }
+  if (liveStream) { liveStream.getTracks().forEach(t => t.stop()); liveStream = null; }
+
+  document.getElementById('cam-video').classList.add('hidden');
+  document.getElementById('cam-overlay').classList.add('hidden');
+  clearOverlay();
+  document.getElementById('video-placeholder').style.display = '';
+  document.getElementById('live-badge').classList.remove('show');
+  document.getElementById('btn-start').style.display = 'inline-flex';
+  document.getElementById('btn-stop').style.display  = 'none';
+  document.getElementById('live-info').textContent = '—';
+}
+
+function captureFrameAsBase64(videoEl, quality = 0.7) {
+  const canvas = document.createElement('canvas');
+  canvas.width  = videoEl.videoWidth  || 640;
+  canvas.height = videoEl.videoHeight || 480;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', quality);
+}
+
+function clearOverlay() {
+  const overlay = document.getElementById('cam-overlay');
+  const ctx = overlay.getContext('2d');
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+}
+
+/* Draw boxes/labels on canvas overlay ON TOP of live video */
+function drawBoxesOnOverlay(results) {
+  const overlay = document.getElementById('cam-overlay');
+  const video   = document.getElementById('cam-video');
+  if (!overlay.width)  overlay.width  = video.videoWidth  || 640;
+  if (!overlay.height) overlay.height = video.videoHeight || 480;
+  const ctx = overlay.getContext('2d');
+  ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+  results.forEach(r => {
+    if (!r.box) return;
+    const [x, y, w, h] = r.box;
+    const known = r.name !== 'Unknown';
+    const color = known ? '#22c55e' : '#ef4444';
+
+    // Bounding box
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(3, overlay.width / 200);
+    ctx.strokeRect(x, y, w, h);
+
+    // Label background + text
+    const text = `${r.name}  ${r.confidence}%`;
+    const fontSize = Math.max(16, overlay.width / 35);
+    ctx.font = `bold ${fontSize}px DM Sans, sans-serif`;
+    const padding = 6;
+    const textWidth = ctx.measureText(text).width;
+    const labelH = fontSize + padding * 2;
+
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y - labelH, textWidth + padding * 2, labelH);
+
+    ctx.fillStyle = 'white';
+    ctx.fillText(text, x + padding, y - padding - 2);
+  });
+}
+
+async function sendLiveFrame() {
+  if (liveBusy || !liveStream) return;
+  const video = document.getElementById('cam-video');
+  if (!video.videoWidth) return;
+
+  liveBusy = true;
+  const frame     = captureFrameAsBase64(video, 0.65);
+  const threshold = document.getElementById('live-threshold').value;
+
+  const fd = new FormData();
+  fd.append('frame',          frame);
+  fd.append('threshold',      threshold);
+  fd.append('log_attendance', 'true');
+
+  try {
+    const r = await fetch('/api/recognize', { method:'POST', body:fd });
+    const d = await r.json();
+
+    if (d.ok) {
+      // Draw boxes ON TOP of live video — no more freeze
+      drawBoxesOnOverlay(d.results || []);
+
+      document.getElementById('live-info').textContent =
+        d.faces + ' face(s) · last update ' + new Date().toLocaleTimeString();
+
+      renderLiveResults(d.results || []);
+    }
+  } catch (e) { /* network blip — try next tick */ }
+  finally { liveBusy = false; }
+}
+
+function renderLiveResults(results) {
+  const el = document.getElementById('live-results');
+  if (!results.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">👁️</div><p style="font-size:13px;">No faces in frame</p></div>';
+    return;
+  }
+  el.innerHTML = results.map((r,i) => resultCardHtml(r, i, true)).join('');
+}
+
+function resultCardHtml(r, i, withAttendance) {
+  const known = r.name !== 'Unknown';
+  let attTag = '';
+  if (withAttendance) {
+    if (r.attendance === 'Logged')               attTag = '<div class="attendance-tag logged">✓ Logged</div>';
+    else if (r.attendance === 'Already Present') attTag = '<div class="attendance-tag already">Already today</div>';
+    else if (r.attendance === 'N/A')             attTag = '<div class="attendance-tag na">No log</div>';
+  }
+  return `
+    <div class="result-card ${known?'':'unknown'}">
+      <div class="result-icon">${known?'😊':'❓'}</div>
+      <div class="result-info">
+        <div class="result-name">${escapeHtml(r.name)}</div>
+        <div class="result-meta">Face #${i+1}</div>
+        ${attTag}
+      </div>
+      <div class="result-conf ${r.confidence < 50 ? 'low' : ''}">${r.confidence}%</div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════
+   UPLOAD — Mode B
+═══════════════════════════════════════ */
+function loadUploadImage(input) {
+  if (!input.files.length) return;
+  const url = URL.createObjectURL(input.files[0]);
+  const img = document.getElementById('up-preview');
+  img.src = url;
+  img.classList.remove('hidden');
+  document.getElementById('up-placeholder').style.display = 'none';
+  document.getElementById('btn-up-recognize').disabled = false;
+}
+
+async function runUpload() {
+  const input = document.getElementById('up-file');
+  if (!input.files.length) return;
+  const btn = document.getElementById('btn-up-recognize');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analyzing…';
+
+  const fd = new FormData();
+  fd.append('image',          input.files[0]);
+  fd.append('threshold',      document.getElementById('up-threshold').value);
+  fd.append('log_attendance', 'false');
+
+  try {
+    const r = await fetch('/api/recognize', { method:'POST', body:fd });
+    const d = await r.json();
+
+    if (d.annotated) {
+      const img = document.getElementById('up-preview');
+      img.src = d.annotated;
+      img.classList.remove('hidden');
+      document.getElementById('up-placeholder').style.display = 'none';
+    }
+
+    const el = document.getElementById('up-results');
+    if (!d.results || !d.results.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">😕</div><p style="font-size:13px;">No faces detected</p></div>';
+    } else {
+      el.innerHTML = d.results.map((r,i) => resultCardHtml(r, i, false)).join('');
+    }
+    toast(d.message || 'Done', d.faces > 0 ? 'success' : 'info');
+  } catch (e) {
+    toast('Server error', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🔍 Identify Faces';
+}
+
+/* ═══════════════════════════════════════
+   MANAGE — Capture from webcam
+═══════════════════════════════════════ */
+async function startCapture() {
+  const name  = document.getElementById('cap-name').value.trim();
+  const count = parseInt(document.getElementById('cap-count').value) || 30;
+  if (!name)        return toast('Enter a name first.', 'error');
+  if (count < 5)    return toast('Capture at least 5 frames.', 'error');
+
+  try {
+    capStream = await navigator.mediaDevices.getUserMedia({
+      video: { width: { ideal: 640 }, height: { ideal: 480 } }, audio: false
+    });
+  } catch (e) {
+    toast('Camera permission denied.', 'error'); return;
+  }
+
+  const video = document.getElementById('cap-video');
+  video.srcObject = capStream;
+  video.classList.remove('hidden');
+  document.getElementById('cap-placeholder').style.display = 'none';
+  document.getElementById('cap-progress').style.display = '';
+
+  document.getElementById('btn-cap-start').disabled = true;
+  document.getElementById('btn-cap-start').innerHTML = '<span class="spinner"></span> Capturing…';
+
+  await new Promise(r => setTimeout(r, 800));
+
+  const frames = [];
+  for (let i = 0; i < count; i++) {
+    if (!capStream) break;
+    if (!video.videoWidth) { i--; await new Promise(r=>setTimeout(r,100)); continue; }
+
+    frames.push(captureFrameAsBase64(video, 0.85));
+    const pct = ((i+1) / count) * 100;
+    document.getElementById('cap-progress-fill').style.width = pct + '%';
+    document.getElementById('cap-counter').textContent =
+      `Captured ${i+1}/${count} — keep moving slowly`;
+
+    await new Promise(r => setTimeout(r, 350));
+  }
+
+  document.getElementById('cap-counter').textContent = 'Uploading frames…';
+  try {
+    const r = await fetch('/api/capture_to_dataset', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ person_name: name, frames })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      toast(`Saved ${d.saved}/${d.saved + d.skipped} valid frames for "${name}"`, 'success');
+      document.getElementById('cap-name').value = '';
+      refreshStatus();
+    } else {
+      toast(d.error || 'Capture failed', 'error');
+    }
+    document.getElementById('cap-counter').textContent =
+      `Done — ${d.saved||0} saved, ${d.skipped||0} skipped`;
+  } catch (e) {
+    toast('Server error during upload.', 'error');
+    document.getElementById('cap-counter').textContent = 'Upload failed';
+  }
+
+  stopCaptureStream();
+  document.getElementById('btn-cap-start').disabled = false;
+  document.getElementById('btn-cap-start').innerHTML = '▶️ Start Capture';
+}
+
+function stopCaptureStream() {
+  if (capStream) { capStream.getTracks().forEach(t => t.stop()); capStream = null; }
+  document.getElementById('cap-video').classList.add('hidden');
+  document.getElementById('cap-placeholder').style.display = '';
+  document.getElementById('cap-progress').style.display = 'none';
+  document.getElementById('cap-progress-fill').style.width = '0%';
+}
+
+/* ═══════════════════════════════════════
+   MANAGE — Upload + Delete + Train
+═══════════════════════════════════════ */
+async function uploadDataset() {
+  const name  = document.getElementById('up-name').value.trim();
+  const files = document.getElementById('up-images').files;
+  if (!name)         return toast('Enter a name first.', 'error');
+  if (!files.length) return toast('Select at least one image.', 'error');
+
+  const btn = document.getElementById('btn-up-images');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Uploading…';
+
+  const fd = new FormData();
+  fd.append('person_name', name);
+  Array.from(files).forEach(f => fd.append('images', f));
+
+  try {
+    const r = await fetch('/api/upload_dataset', { method:'POST', body:fd });
+    const d = await r.json();
+    if (d.ok) {
+      toast(`Saved ${d.saved} image(s) for "${d.person}"`, 'success');
+      document.getElementById('up-name').value = '';
+      document.getElementById('up-images').value = '';
+      refreshStatus();
+    } else {
+      toast(d.error || 'Upload failed', 'error');
+    }
+  } catch (e) {
+    toast('Server error', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '📤 Upload Photos';
+}
+
+async function deletePerson(name) {
+  if (!confirm(`Remove "${name}" from dataset?\nYou'll need to retrain after.`)) return;
+  try {
+    const r = await fetch('/api/delete_person', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ name })
+    });
+    const d = await r.json();
+    if (d.ok) { toast(`"${name}" removed`, 'success'); refreshStatus(); }
+    else        toast(d.error, 'error');
+  } catch (e) { toast('Server error', 'error'); }
+}
+
+async function trainModel() {
+  const btn = document.getElementById('btn-train');
+  const log = document.getElementById('train-status');
+  const box = document.getElementById('train-results');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Training…';
+  log.textContent = 'Building training set + running PCA → LDA → SVM…';
+  box.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/train', { method:'POST' });
+    const d = await r.json();
+    if (d.ok) {
+      // Pretty stats panel — train AND test accuracy
+      let testRow;
+      if (d.test_accuracy != null) {
+        let cls = '';
+        if (d.test_accuracy < 50) cls = 'danger';
+        else if (d.test_accuracy < 75) cls = 'warn';
+        testRow = `<div class="row"><span class="label">Test accuracy</span><span class="value ${cls}">${d.test_accuracy}%</span></div>`;
+      } else {
+        testRow = `<div class="row"><span class="label">Test accuracy</span><span class="value warn">— (need ≥5 samples per person)</span></div>`;
+      }
+
+      box.innerHTML = `
+        <div class="row"><span class="label">Persons</span><span class="value">${d.persons.length}</span></div>
+        <div class="row"><span class="label">Total samples</span><span class="value">${d.samples}</span></div>
+        <div class="row"><span class="label">Train / Test split</span><span class="value">${d.train_samples} / ${d.test_samples}</span></div>
+        <div class="row"><span class="label">PCA components</span><span class="value">${d.n_components_pca}</span></div>
+        <div class="row"><span class="label">LDA components</span><span class="value">${d.n_components_lda}</span></div>
+        <div class="row"><span class="label">PCA variance explained</span><span class="value">${d.explained_variance}%</span></div>
+        <div class="row"><span class="label">Train accuracy</span><span class="value">${d.train_accuracy}%</span></div>
+        ${testRow}`;
+      box.style.display = 'block';
+      log.textContent = '';
+      toast('Model retrained successfully', 'success');
+      refreshStatus();
+    } else {
+      log.textContent = '✗ ' + d.error;
+      toast(d.error, 'error');
+    }
+  } catch (e) {
+    log.textContent = '✗ Server error';
+    toast('Server error', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '⚡ Retrain Model';
+}
+
+/* ═══════════════════════════════════════
+   ATTENDANCE LOGS
+═══════════════════════════════════════ */
+async function loadLogs() {
+  try {
+    const r = await fetch('/api/get_logs');
+    const d = await r.json();
+    const logs = d.logs || [];
+
+    const today    = new Date().toISOString().slice(0,10);
+    const weekAgo  = new Date(Date.now() - 7*24*3600*1000).toISOString().slice(0,10);
+    const todayCnt = logs.filter(l => l[1] === today).length;
+    const weekCnt  = logs.filter(l => l[1] >= weekAgo).length;
+    const unique   = new Set(logs.map(l => l[0])).size;
+
+    document.getElementById('stat-today').textContent  = todayCnt;
+    document.getElementById('stat-week').textContent   = weekCnt;
+    document.getElementById('stat-all').textContent    = logs.length;
+    document.getElementById('stat-unique').textContent = unique;
+
+    const body = document.getElementById('log-body');
+    if (!logs.length) {
+      body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--muted); padding:30px;">No attendance logs yet</td></tr>';
+    } else {
+      body.innerHTML = logs.map(l => {
+        const conf = l[3] != null ? l[3].toFixed(1) + '%' : '—';
+        return `<tr>
+          <td><strong>${escapeHtml(l[0])}</strong></td>
+          <td style="font-family:var(--mono); color:var(--muted);">${escapeHtml(l[1])}</td>
+          <td style="font-family:var(--mono); color:var(--muted);">${escapeHtml(l[2])}</td>
+          <td style="font-family:var(--mono); color:var(--accent);">${conf}</td>
+        </tr>`;
+      }).join('');
+    }
+  } catch (e) { toast('Could not load logs', 'error'); }
+}
+
+async function clearLogs() {
+  if (!confirm('Delete ALL attendance records?\nThis cannot be undone.')) return;
+  try {
+    const r = await fetch('/api/clear_logs', { method:'POST' });
+    const d = await r.json();
+    if (d.ok) { toast('All logs cleared', 'success'); loadLogs(); }
+  } catch (e) { toast('Server error', 'error'); }
+}
+
+/* ═══ DRAG & DROP ═══ */
+const dropUp = document.getElementById('drop-up');
+if (dropUp) {
+  dropUp.addEventListener('dragover',  e => { e.preventDefault(); dropUp.classList.add('drag-over'); });
+  dropUp.addEventListener('dragleave', () => dropUp.classList.remove('drag-over'));
+  dropUp.addEventListener('drop', e => {
+    e.preventDefault(); dropUp.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+      document.getElementById('up-file').files = e.dataTransfer.files;
+      loadUploadImage(document.getElementById('up-file'));
+    }
+  });
+}
+
+/* ═══ INIT ═══ */
+refreshStatus();
+setInterval(refreshStatus, 15000);
+</script>
+
+</body>
+</html>
